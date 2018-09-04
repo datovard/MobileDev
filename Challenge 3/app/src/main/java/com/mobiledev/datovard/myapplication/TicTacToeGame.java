@@ -20,12 +20,20 @@ public class TicTacToeGame {
     public static final char COMPUTER_PLAYER = 'O';
     public static final char OPEN_SPOT = '\0';
 
+    public int human_wins = 0;
+    public int computer_wins = 0;
+    public int ties = 0;
+
+    public boolean first_turn;
+
     private Random mRand;
 
     public TicTacToeGame() {
 
         // Seed the random number generator
         mRand = new Random();
+
+        first_turn = true;
     }
 
     // Check for a winner.  Return
@@ -124,7 +132,7 @@ public class TicTacToeGame {
                 mBoard[i] = COMPUTER_PLAYER;
                 if (checkForWinner() == 3) {
                     mBoard[i] = curr;
-                    return move;
+                    return i;
                 }
                 else
                     mBoard[i] = curr;
@@ -139,7 +147,7 @@ public class TicTacToeGame {
                 if (checkForWinner() == 2) {
                     //mBoard[i] = COMPUTER_PLAYER;
                     mBoard[i] = curr;
-                    return move;
+                    return i;
                 }
                 else
                     mBoard[i] = curr;

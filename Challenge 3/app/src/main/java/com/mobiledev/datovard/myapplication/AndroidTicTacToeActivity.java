@@ -4,6 +4,8 @@ import android.content.Context;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -16,6 +18,10 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
     private Button mBoardButtons[];
 
     private TextView mInfoTextView;
+
+    private TextView mHumanWins;
+    private TextView mTiesWins;
+    private TextView mAndroidWins;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,10 +40,26 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
         mBoardButtons[8] = (Button) findViewById(R.id.nine);
 
         mInfoTextView = (TextView) findViewById(R.id.information);
+        mHumanWins    = (TextView) findViewById(R.id.human_wins);
+        mTiesWins     = (TextView) findViewById(R.id.ties_wins);
+        mAndroidWins  = (TextView) findViewById(R.id.android_wins);
 
         mGame =new TicTacToeGame();
 
         startNewGame();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
+        menu.add("New Game");
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        startNewGame();
+        return true;
     }
 
     private void startNewGame()
@@ -51,7 +73,17 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
             mBoardButtons[i].setOnClickListener(new ButtonClickListener(i));
         }
 
-        mInfoTextView.setText("You go first.");
+        if( mGame.first_turn )
+        {
+            mInfoTextView.setText(R.string.first_human);
+        }
+        else
+        {
+            int move = mGame.getComputerMove();
+            setMove(TicTacToeGame.COMPUTER_PLAYER, move);
+            mInfoTextView.setText(R.string.turn_human);
+        }
+        mGame.first_turn = !mGame.first_turn;
     }
 
     private void setMove(char player, int location) {
@@ -65,6 +97,13 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
             mBoardButtons[location].setTextColor(Color.rgb(200, 0, 0));
     }
 
+    private void blockButtons(){
+        for( int i = 0; i < mBoardButtons.length; i++ )
+        {
+            mBoardButtons[i].setEnabled(false);
+        }
+    }
+
     // Handles clicks on the game board buttons
     private class ButtonClickListener implements View.OnClickListener {
         int location;
@@ -74,29 +113,38 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
         }
 
         public void onClick(View view) {
-            Context context = getApplicationContext();
-
             if (mBoardButtons[location].isEnabled()) {
                 setMove(TicTacToeGame.HUMAN_PLAYER, location);
 
                 // If no winner yet, let the computer make a move
                 int winner = mGame.checkForWinner();
                 if (winner == 0) {
-                    mInfoTextView.setText("It's Android's turn.");
+                    mInfoTextView.setText(R.string.turn_computer);
                     int move = mGame.getComputerMove();
-
-                    //setMove(TicTacToeGame.COMPUTER_PLAYER, move);
-                    //winner = mGame.checkForWinner();
+                    setMove(TicTacToeGame.COMPUTER_PLAYER, move);
+                    winner = mGame.checkForWinner();
                 }
 
-                /*if (winner == 0)
-                    mInfoTextView.setText("It's your turn.");
-                else if (winner == 1)
-                    mInfoTextView.setText("It's a tie!");
-                else if (winner == 2)
-                    mInfoTextView.setText("You won!");
-                else
-                    mInfoTextView.setText("Android won!");*/
+                if (winner == 0) {
+                    mInfoTextView.setText(R.string.turn_human);
+                } else if (winner == 1){
+                    mInfoTextView.setText(R.string.result_tie);
+                    mGame.ties++;
+                    mTiesWins.setText(String.valueOf(mGame.ties));
+                }
+                else if (winner == 2) {
+                    mInfoTextView.setText(R.string.result_human_wins);
+                    mGame.human_wins++;
+                    mHumanWins.setText(String.valueOf(mGame.human_wins));
+                }
+                else {
+                    blockButtons();
+                    mInfoTextView.setText(R.string.result_computer_wins);
+                    mGame.computer_wins++;
+                    mAndroidWins.setText(String.valueOf(mGame.computer_wins));
+                }
+
+
             }
         }
     }
