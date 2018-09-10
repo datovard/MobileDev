@@ -28,7 +28,24 @@ public class TicTacToeGame {
 
     private Random mRand;
 
-    public TicTacToeGame() {
+    //The computer's difficulty levels
+    public enum DifficultyLevel {Easy, Harder,Expert};
+
+    //Current difficulty level
+    private DifficultyLevel mDifficultyLevel = DifficultyLevel.Expert;
+
+    public DifficultyLevel getDifficultyLevel()
+    {
+        return mDifficultyLevel;
+    }
+
+    public void setDifficultyLevel( DifficultyLevel difficultyLevel )
+    {
+        mDifficultyLevel = difficultyLevel;
+    }
+
+    public TicTacToeGame()
+    {
 
         // Seed the random number generator
         mRand = new Random();
@@ -41,7 +58,8 @@ public class TicTacToeGame {
     //  1 if it's a tie
     //  2 if X won
     //  3 if O won
-    public int checkForWinner() {
+    public int checkForWinner()
+    {
 
         // Check horizontal wins
         for (int i = 0; i <= 6; i += 3)	{
@@ -117,11 +135,20 @@ public class TicTacToeGame {
         }
     }
 
-    /** Return the best move for the computer to make. You must call setMove()
-     * to actually make the computer move to that location.
-     * @return The best move for the computer to make (0-8).
-     */
-    public int getComputerMove()
+    public int getRandomMove()
+    {
+        int move;
+
+        // Generate random move
+        do
+        {
+            move = mRand.nextInt(BOARD_SIZE);
+        } while (mBoard[move] == HUMAN_PLAYER || mBoard[move] == COMPUTER_PLAYER);
+
+        return move;
+    }
+
+    public int getWinningMove()
     {
         int move = -1;
 
@@ -139,6 +166,13 @@ public class TicTacToeGame {
             }
         }
 
+        return move;
+    }
+
+    public int getBlockingMove()
+    {
+        int move = -1;
+
         // See if there's a move O can make to block X from winning
         for (int i = 0; i < BOARD_SIZE; i++) {
             if (mBoard[i] != HUMAN_PLAYER && mBoard[i] != COMPUTER_PLAYER) {
@@ -154,11 +188,32 @@ public class TicTacToeGame {
             }
         }
 
-        // Generate random move
-        do
-        {
-            move = mRand.nextInt(BOARD_SIZE);
-        } while (mBoard[move] == HUMAN_PLAYER || mBoard[move] == COMPUTER_PLAYER);
+        return move;
+    }
+
+    /** Return the best move for the computer to make. You must call setMove()
+     * to actually make the computer move to that location.
+     * @return The best move for the computer to make (0-8).
+     */
+    public int getComputerMove()
+    {
+        int move = 1;
+
+        if(mDifficultyLevel == DifficultyLevel.Easy)
+            move = getRandomMove();
+        else if (mDifficultyLevel == DifficultyLevel.Harder) {
+            move = getWinningMove();
+            if(move== -1)
+                move = getRandomMove();
+        }
+        else if (mDifficultyLevel == DifficultyLevel.Expert) {
+            // Try to win, but if that's not possible,block.
+            // If that's not possible, move anywhere.
+            move = getWinningMove();
+            if(move == -1) move = getBlockingMove();
+            if(move == -1) move = getRandomMove();
+        }
+
         return move;
     }
 }
