@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -29,6 +30,7 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
 
     static final int DIALOG_DIFFICULTY_ID = 0;
     static final int DIALOG_QUIT_ID = 1;
+    static final int DIALOG_ABOUT = 2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,7 +79,11 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
             case R.id.quit:
                 showDialog(DIALOG_QUIT_ID);
                 return true;
+            case R.id.about:
+                showDialog(DIALOG_ABOUT);
+                return true;
         }
+
         return false;
     }
 
@@ -133,6 +139,14 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
                             }
                         })
                         .setNegativeButton(R.string.no, null);
+                dialog = builder.create();
+                break;
+            case DIALOG_ABOUT:
+                Context context = getApplicationContext();
+                LayoutInflater inflater = (LayoutInflater) context.getSystemService(LAYOUT_INFLATER_SERVICE);
+                View layout = inflater.inflate(R.layout.about_dialog, null);
+                builder.setView(layout);
+                builder.setPositiveButton("OK", null);
                 dialog = builder.create();
                 break;
         }
