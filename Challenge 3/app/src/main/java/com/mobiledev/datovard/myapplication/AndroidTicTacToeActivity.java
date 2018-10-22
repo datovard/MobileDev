@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -32,28 +33,47 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
     static final int DIALOG_QUIT_ID = 1;
     static final int DIALOG_ABOUT = 2;
 
+    private BoardView mBoardView;
+
+    // Listen for touches on the board
+    private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
+        public boolean onTouch(View v, MotionEvent event) {
+
+            // Determine which cell was touched
+            int col = (int) event.getX() / mBoardView.getBoardCellWidth();
+            int row = (int) event.getY() / mBoardView.getBoardCellHeight();
+            int pos = row * 3 + col;
+
+            if (!mGameOver && setMove(TicTacToeGame.HUMAN_PLAYER, pos))	{
+
+                // If no winner yet, let the computer make a move
+
+            }
+
+            // So we aren't notified of continued events when finger is moved
+            return false;
+        }
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_android_tic_tac_toe);
 
-        mBoardButtons = new Button[TicTacToeGame.BOARD_SIZE];
-        mBoardButtons[0] = (Button) findViewById(R.id.one);
-        mBoardButtons[1] = (Button) findViewById(R.id.two);
-        mBoardButtons[2] = (Button) findViewById(R.id.three);
-        mBoardButtons[3] = (Button) findViewById(R.id.four);
-        mBoardButtons[4] = (Button) findViewById(R.id.five);
-        mBoardButtons[5] = (Button) findViewById(R.id.six);
-        mBoardButtons[6] = (Button) findViewById(R.id.seven);
-        mBoardButtons[7] = (Button) findViewById(R.id.eight);
-        mBoardButtons[8] = (Button) findViewById(R.id.nine);
+        mGame = new TicTacToeGame();
+        mBoardView = (BoardView) findViewById(R.id.board);
+        mBoardView.setGame(mGame);
+
+        // Listen for touches on the board
+        mBoardView.setOnTouchListener(mTouchListener);
+
 
         mInfoTextView = (TextView) findViewById(R.id.information);
         mHumanWins    = (TextView) findViewById(R.id.human_wins);
         mTiesWins     = (TextView) findViewById(R.id.ties_wins);
         mAndroidWins  = (TextView) findViewById(R.id.android_wins);
 
-        mGame =new TicTacToeGame();
+        mGame = new TicTacToeGame();
 
         startNewGame();
     }
@@ -153,16 +173,10 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
         return dialog;
     }
 
-                private void startNewGame()
+    private void startNewGame()
     {
         mGame.clearBoard();
-
-        for( int i = 0; i < mBoardButtons.length; i++ )
-        {
-            mBoardButtons[i].setText("");
-            mBoardButtons[i].setEnabled(true);
-            mBoardButtons[i].setOnClickListener(new ButtonClickListener(i));
-        }
+        mBoardView.invalidate();   // Redraw the board
 
         if( mGame.first_turn )
         {
@@ -234,8 +248,6 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
                     mGame.computer_wins++;
                     mAndroidWins.setText(String.valueOf(mGame.computer_wins));
                 }
-
-
             }
         }
     }

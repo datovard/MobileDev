@@ -216,4 +216,8 @@ public class TicTacToeGame {
 
         return move;
     }
+
+    public int getBoardOccupant( int location ){
+        return this.mBoard[location];
+    }
 }
