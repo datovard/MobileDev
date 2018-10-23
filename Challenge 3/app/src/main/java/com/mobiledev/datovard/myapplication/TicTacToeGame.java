@@ -127,12 +127,14 @@ public class TicTacToeGame {
      * @param player - The HUMAN_PLAYER or COMPUTER_PLAYER
      * @param location - The location (0-8) to place the move
      */
-    public void setMove(char player, int location)
+    public boolean setMove(char player, int location)
     {
         if( this.mBoard[location] == this.OPEN_SPOT )
         {
             this.mBoard[location] = player;
+            return true;
         }
+        return false;
     }
 
     public int getRandomMove()

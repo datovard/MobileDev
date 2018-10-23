@@ -29,6 +29,8 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
     private TextView mTiesWins;
     private TextView mAndroidWins;
 
+    private boolean mGameOver;
+
     static final int DIALOG_DIFFICULTY_ID = 0;
     static final int DIALOG_QUIT_ID = 1;
     static final int DIALOG_ABOUT = 2;
@@ -64,9 +66,10 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
         mBoardView = (BoardView) findViewById(R.id.board);
         mBoardView.setGame(mGame);
 
+        mGameOver = false;
+
         // Listen for touches on the board
         mBoardView.setOnTouchListener(mTouchListener);
-
 
         mInfoTextView = (TextView) findViewById(R.id.information);
         mHumanWins    = (TextView) findViewById(R.id.human_wins);
@@ -191,7 +194,7 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
         mGame.first_turn = !mGame.first_turn;
     }
 
-    private void setMove(char player, int location) {
+    /*private void setMove(char player, int location) {
 
         mGame.setMove(player, location);
         mBoardButtons[location].setEnabled(false);
@@ -200,14 +203,17 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
             mBoardButtons[location].setTextColor(Color.rgb(0, 200, 0));
         else
             mBoardButtons[location].setTextColor(Color.rgb(200, 0, 0));
+    }*/
+
+    private boolean setMove(char player, int location) {
+        if (mGame.setMove(player, location)) {
+            mBoardView.invalidate();   // Redraw the board
+            return true;
+        }
+        return false;
     }
 
-    private void blockButtons(){
-        for( int i = 0; i < mBoardButtons.length; i++ )
-        {
-            mBoardButtons[i].setEnabled(false);
-        }
-    }
+
 
     // Handles clicks on the game board buttons
     private class ButtonClickListener implements View.OnClickListener {
@@ -243,7 +249,7 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
                     mHumanWins.setText(String.valueOf(mGame.human_wins));
                 }
                 else {
-                    blockButtons();
+                    mGameOver = true;
                     mInfoTextView.setText(R.string.result_computer_wins);
                     mGame.computer_wins++;
                     mAndroidWins.setText(String.valueOf(mGame.computer_wins));
