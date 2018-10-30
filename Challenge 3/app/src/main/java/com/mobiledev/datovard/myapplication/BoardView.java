@@ -68,18 +68,14 @@ public class BoardView extends View {
         canvas.drawLine(0, cellWidth, boardWidth, cellHeight, mPaint);
         canvas.drawLine(0, cellWidth*2, boardWidth, cellHeight*2, mPaint);
 
-        mGame.printActualTable();
-
         // Draw all the X and O images
         for (int i = 0; i < TicTacToeGame.BOARD_SIZE; i++) {
             int col = i % 3;
             int row = i / 3;
 
-            Log.d("CREATION", String.valueOf(i) + " - " + String.valueOf(col) + " - " + String.valueOf(row) );
-
             // Define the boundaries of a destination rectangle for the image
-            int left = row * cellWidth;
-            int top = col * cellHeight;
+            int left = col * cellWidth;
+            int top = row * cellHeight;
             int right = left + cellWidth;
             int bottom = top + cellHeight;
 

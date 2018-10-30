@@ -5,6 +5,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Color;
+import android.media.MediaPlayer;
+import android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -38,6 +40,9 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
 
     private BoardView mBoardView;
 
+    MediaPlayer mHumanMediaPlayer;
+    MediaPlayer mComputerMediaPlayer;
+
     // Listen for touches on the board
     private View.OnTouchListener mTouchListener = new View.OnTouchListener() {
         public boolean onTouch(View v, MotionEvent event) {
@@ -50,34 +55,43 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
             //Log.d("CREATION", "onDraw: " + String.valueOf(pos));
 
             if (!mGameOver && setMove(TicTacToeGame.HUMAN_PLAYER, pos))	{
-                //mGame.printActualTable();
-                // If no winner yet, let the computer make a move
-                /*int winner = mGame.checkForWinner();
-                if (winner == 0) {
-                    mInfoTextView.setText(R.string.turn_computer);
-                    int move = mGame.getComputerMove();
-                    setMove(TicTacToeGame.COMPUTER_PLAYER, move);
-                    winner = mGame.checkForWinner();
-                }
+                mHumanMediaPlayer.start();
 
-                if (winner == 0) {
-                    mInfoTextView.setText(R.string.turn_human);
-                } else if (winner == 1){
-                    mInfoTextView.setText(R.string.result_tie);
-                    mGame.ties++;
-                    mTiesWins.setText(String.valueOf(mGame.ties));
-                }
-                else if (winner == 2) {
-                    mInfoTextView.setText(R.string.result_human_wins);
-                    mGame.human_wins++;
-                    mHumanWins.setText(String.valueOf(mGame.human_wins));
-                }
-                else {
-                    mGameOver = true;
-                    mInfoTextView.setText(R.string.result_computer_wins);
-                    mGame.computer_wins++;
-                    mAndroidWins.setText(String.valueOf(mGame.computer_wins));
-                }*/
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    public void run() {
+                        int winner = mGame.checkForWinner();
+
+                        // If no winner yet, let the computer make a move
+                        if (winner == 0) {
+                            mInfoTextView.setText(R.string.turn_computer);
+                            int move = mGame.getComputerMove();
+                            setMove(TicTacToeGame.COMPUTER_PLAYER, move);
+                            mComputerMediaPlayer.start();
+                            winner = mGame.checkForWinner();
+                        }
+
+                        if (winner == 0) {
+                            mInfoTextView.setText(R.string.turn_human);
+                        } else if (winner == 1){
+                            mInfoTextView.setText(R.string.result_tie);
+                            mGame.ties++;
+                            mTiesWins.setText(String.valueOf(mGame.ties));
+                        }
+                        else if (winner == 2) {
+                            mInfoTextView.setText(R.string.result_human_wins);
+                            mGame.human_wins++;
+                            mHumanWins.setText(String.valueOf(mGame.human_wins));
+                        }
+                        else {
+                            mGameOver = true;
+                            mInfoTextView.setText(R.string.result_computer_wins);
+                            mGame.computer_wins++;
+                            mAndroidWins.setText(String.valueOf(mGame.computer_wins));
+                        }
+                    }
+                }, 1000);
+
                 return true;
             }
 
@@ -107,6 +121,23 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
 
         startNewGame();
     }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mHumanMediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.x_sound);
+        mComputerMediaPlayer = MediaPlayer.create(getApplicationContext(), R.raw.o_sound);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        mHumanMediaPlayer.release();
+        mComputerMediaPlayer.release();
+    }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
