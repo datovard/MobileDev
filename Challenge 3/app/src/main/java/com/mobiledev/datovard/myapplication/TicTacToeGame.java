@@ -7,13 +7,15 @@ package com.mobiledev.datovard.myapplication;
  * is X and the computer is O.
  */
 
+import android.util.Log;
+
 import java.util.InputMismatchException;
 import java.util.Random;
 import java.util.Scanner;
 
 public class TicTacToeGame {
 
-    private char mBoard[] = {'1','2','3','4','5','6','7','8','9'};
+    private char mBoard[] = {'\0','\0','\0','\0','\0','\0','\0','\0','\0'};
     public static final int BOARD_SIZE = 9;
 
     public static final char HUMAN_PLAYER = 'X';
@@ -121,6 +123,18 @@ public class TicTacToeGame {
         }
     }
 
+    public void printActualTable() {
+        Log.d("CREATION", "" + String.valueOf(getBoardOccupant(0)) + " - " +
+                String.valueOf(getBoardOccupant(1)) + " - " +
+                String.valueOf(getBoardOccupant(2)) );
+        Log.d("CREATION", "" + String.valueOf(getBoardOccupant(3)) + " - " +
+                String.valueOf(getBoardOccupant(4)) + " - " +
+                String.valueOf(getBoardOccupant(5)) );
+        Log.d("CREATION", "" + String.valueOf(getBoardOccupant(6)) + " - " +
+                String.valueOf(getBoardOccupant(7)) + " - " +
+                String.valueOf(getBoardOccupant(8)) );
+    }
+
     /** Set the given player at the given location on the game board.
      *  The location must be available, or the board will not be changed.
      *
@@ -219,7 +233,7 @@ public class TicTacToeGame {
         return move;
     }
 
-    public int getBoardOccupant( int location ){
+    public char getBoardOccupant( int location ){
         return this.mBoard[location];
     }
 }

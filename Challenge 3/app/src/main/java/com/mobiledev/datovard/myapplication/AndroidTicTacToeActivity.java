@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.graphics.Color;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -46,10 +47,38 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
             int row = (int) event.getY() / mBoardView.getBoardCellHeight();
             int pos = row * 3 + col;
 
+            //Log.d("CREATION", "onDraw: " + String.valueOf(pos));
+
             if (!mGameOver && setMove(TicTacToeGame.HUMAN_PLAYER, pos))	{
-
+                //mGame.printActualTable();
                 // If no winner yet, let the computer make a move
+                /*int winner = mGame.checkForWinner();
+                if (winner == 0) {
+                    mInfoTextView.setText(R.string.turn_computer);
+                    int move = mGame.getComputerMove();
+                    setMove(TicTacToeGame.COMPUTER_PLAYER, move);
+                    winner = mGame.checkForWinner();
+                }
 
+                if (winner == 0) {
+                    mInfoTextView.setText(R.string.turn_human);
+                } else if (winner == 1){
+                    mInfoTextView.setText(R.string.result_tie);
+                    mGame.ties++;
+                    mTiesWins.setText(String.valueOf(mGame.ties));
+                }
+                else if (winner == 2) {
+                    mInfoTextView.setText(R.string.result_human_wins);
+                    mGame.human_wins++;
+                    mHumanWins.setText(String.valueOf(mGame.human_wins));
+                }
+                else {
+                    mGameOver = true;
+                    mInfoTextView.setText(R.string.result_computer_wins);
+                    mGame.computer_wins++;
+                    mAndroidWins.setText(String.valueOf(mGame.computer_wins));
+                }*/
+                return true;
             }
 
             // So we aren't notified of continued events when finger is moved
@@ -75,8 +104,6 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
         mHumanWins    = (TextView) findViewById(R.id.human_wins);
         mTiesWins     = (TextView) findViewById(R.id.ties_wins);
         mAndroidWins  = (TextView) findViewById(R.id.android_wins);
-
-        mGame = new TicTacToeGame();
 
         startNewGame();
     }
@@ -194,26 +221,13 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
         mGame.first_turn = !mGame.first_turn;
     }
 
-    /*private void setMove(char player, int location) {
-
-        mGame.setMove(player, location);
-        mBoardButtons[location].setEnabled(false);
-        mBoardButtons[location].setText(String.valueOf(player));
-        if (player == TicTacToeGame.HUMAN_PLAYER)
-            mBoardButtons[location].setTextColor(Color.rgb(0, 200, 0));
-        else
-            mBoardButtons[location].setTextColor(Color.rgb(200, 0, 0));
-    }*/
-
     private boolean setMove(char player, int location) {
-        if (mGame.setMove(player, location)) {
+        if (this.mGame.setMove(player, location)) {
             mBoardView.invalidate();   // Redraw the board
             return true;
         }
         return false;
     }
-
-
 
     // Handles clicks on the game board buttons
     private class ButtonClickListener implements View.OnClickListener {

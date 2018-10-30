@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.View;
 
 public class BoardView extends View {
@@ -22,7 +23,7 @@ public class BoardView extends View {
     private TicTacToeGame mGame;
 
     public void setGame(TicTacToeGame game) {
-        mGame = game;
+        this.mGame = game;
     }
 
     public void initialize() {
@@ -67,24 +68,28 @@ public class BoardView extends View {
         canvas.drawLine(0, cellWidth, boardWidth, cellHeight, mPaint);
         canvas.drawLine(0, cellWidth*2, boardWidth, cellHeight*2, mPaint);
 
+        mGame.printActualTable();
+
         // Draw all the X and O images
         for (int i = 0; i < TicTacToeGame.BOARD_SIZE; i++) {
             int col = i % 3;
             int row = i / 3;
 
-            // Define the boundaries of a destination rectangle for the image
-            int left = 0;
-            int top = 0;
-            int right = cellWidth;
-            int bottom = cellHeight;
+            Log.d("CREATION", String.valueOf(i) + " - " + String.valueOf(col) + " - " + String.valueOf(row) );
 
-            if (mGame != null && mGame.getBoardOccupant(i) == TicTacToeGame.HUMAN_PLAYER) {
+            // Define the boundaries of a destination rectangle for the image
+            int left = row * cellWidth;
+            int top = col * cellHeight;
+            int right = left + cellWidth;
+            int bottom = top + cellHeight;
+
+            if (this.mGame != null && this.mGame.getBoardOccupant(i) == TicTacToeGame.HUMAN_PLAYER) {
                 canvas.drawBitmap(mHumanBitmap,
                         null,  // src
                         new Rect(left, top, right, bottom),  // dest
                         null);
             }
-            else if (mGame != null && mGame.getBoardOccupant(i) == TicTacToeGame.COMPUTER_PLAYER) {
+            else if (this.mGame != null && this.mGame.getBoardOccupant(i) == TicTacToeGame.COMPUTER_PLAYER) {
                 canvas.drawBitmap(mComputerBitmap,
                         null,  // src
                         new Rect(left, top, right, bottom),  // dest
