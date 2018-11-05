@@ -22,10 +22,6 @@ public class TicTacToeGame {
     public static final char COMPUTER_PLAYER = 'O';
     public static final char OPEN_SPOT = '\0';
 
-    public int human_wins = 0;
-    public int computer_wins = 0;
-    public int ties = 0;
-
     public boolean first_turn;
 
     private Random mRand;
@@ -236,4 +232,8 @@ public class TicTacToeGame {
     public char getBoardOccupant( int location ){
         return this.mBoard[location];
     }
+
+    public char[] getBoardState(){ return mBoard; }
+
+    public void setBoardState( char[] board ){ mBoard = board.clone(); }
 }

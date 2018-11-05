@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.os.Handler;
@@ -28,15 +29,23 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
 
     private TextView mInfoTextView;
 
-    private TextView mHumanWins;
-    private TextView mTiesWins;
-    private TextView mAndroidWins;
+    private TextView mHumanWinsTextView;
+    private TextView mTiesWinsTextView;
+    private TextView mAndroidWinsTextView;
+
+    private int mHumanWins;
+    private int mTiesWins;
+    private int mAndroidWins;
+    private boolean mGoFirst;
 
     private boolean mGameOver;
+
+    private SharedPreferences mPrefs;
 
     static final int DIALOG_DIFFICULTY_ID = 0;
     static final int DIALOG_QUIT_ID = 1;
     static final int DIALOG_ABOUT = 2;
+    static final int DIALOG_RESET = 3;
 
     private BoardView mBoardView;
 
@@ -51,8 +60,6 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
             int col = (int) event.getX() / mBoardView.getBoardCellWidth();
             int row = (int) event.getY() / mBoardView.getBoardCellHeight();
             int pos = row * 3 + col;
-
-            //Log.d("CREATION", "onDraw: " + String.valueOf(pos));
 
             if (!mGameOver && setMove(TicTacToeGame.HUMAN_PLAYER, pos))	{
                 mHumanMediaPlayer.start();
@@ -74,20 +81,22 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
                         if (winner == 0) {
                             mInfoTextView.setText(R.string.turn_human);
                         } else if (winner == 1){
+                            mGameOver = true;
                             mInfoTextView.setText(R.string.result_tie);
-                            mGame.ties++;
-                            mTiesWins.setText(String.valueOf(mGame.ties));
+                            mTiesWins++;
+                            mTiesWinsTextView.setText(String.valueOf(mTiesWins));
                         }
                         else if (winner == 2) {
+                            mGameOver = true;
                             mInfoTextView.setText(R.string.result_human_wins);
-                            mGame.human_wins++;
-                            mHumanWins.setText(String.valueOf(mGame.human_wins));
+                            mHumanWins++;
+                            mHumanWinsTextView.setText(String.valueOf(mHumanWins));
                         }
                         else {
                             mGameOver = true;
                             mInfoTextView.setText(R.string.result_computer_wins);
-                            mGame.computer_wins++;
-                            mAndroidWins.setText(String.valueOf(mGame.computer_wins));
+                            mAndroidWins++;
+                            mAndroidWinsTextView.setText(String.valueOf(mAndroidWins));
                         }
                     }
                 }, 1000);
@@ -101,6 +110,23 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
     };
 
     @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+        outState.putCharArray("board", mGame.getBoardState());
+        outState.putBoolean("mGameOver", mGameOver);
+        outState.putCharSequence("info", mInfoTextView.getText());
+
+        outState.putInt("mHumanWins", Integer.valueOf(mHumanWins));
+        outState.putInt("mAndroidWins", Integer.valueOf(mAndroidWins));
+        outState.putInt("mTiesWins", Integer.valueOf(mTiesWins));
+        outState.putBoolean("mGoFirst", mGoFirst);
+
+        //outState.putChar("mGoFirst", mInfoTextView);
+    }
+
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_android_tic_tac_toe);
@@ -109,17 +135,71 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
         mBoardView = (BoardView) findViewById(R.id.board);
         mBoardView.setGame(mGame);
 
-        mGameOver = false;
-
         // Listen for touches on the board
         mBoardView.setOnTouchListener(mTouchListener);
 
-        mInfoTextView = (TextView) findViewById(R.id.information);
-        mHumanWins    = (TextView) findViewById(R.id.human_wins);
-        mTiesWins     = (TextView) findViewById(R.id.ties_wins);
-        mAndroidWins  = (TextView) findViewById(R.id.android_wins);
+        mInfoTextView         = (TextView) findViewById(R.id.information);
+        mHumanWinsTextView    = (TextView) findViewById(R.id.human_wins);
+        mTiesWinsTextView     = (TextView) findViewById(R.id.ties_wins);
+        mAndroidWinsTextView  = (TextView) findViewById(R.id.android_wins);
 
-        startNewGame();
+        // Restore the scores
+        mPrefs       = getSharedPreferences("ttt_prefs", MODE_PRIVATE);
+        mHumanWins   = mPrefs.getInt("mHumanWins", 0);
+        mAndroidWins = mPrefs.getInt("mAndroidWins", 0);
+        mTiesWins    = mPrefs.getInt("mTiesWins", 0);
+
+        mGoFirst = true;
+
+        if( savedInstanceState == null )
+        {
+            startNewGame();
+        } else
+        {
+            // Restore the game's state
+            mGame.setBoardState(savedInstanceState.getCharArray("board"));
+            mGameOver = savedInstanceState.getBoolean("mGameOver");
+            mInfoTextView.setText(savedInstanceState.getCharSequence("info"));
+
+            mHumanWins   = savedInstanceState.getInt("mHumanWins");
+            mAndroidWins = savedInstanceState.getInt("mAndroidWins");
+            mTiesWins    = savedInstanceState.getInt("mTiesWins");
+            mGoFirst     = savedInstanceState.getBoolean("mGoFirst");
+        }
+        displayScores();
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+
+        // Save the current scores
+        SharedPreferences.Editor ed = mPrefs.edit();
+        ed.putInt("mHumanWins", mHumanWins);
+        ed.putInt("mAndroidWins", mAndroidWins);
+        ed.putInt("mTiesWins", mTiesWins);
+        ed.commit();
+    }
+
+
+    private void displayScores() {
+        mHumanWinsTextView.setText(Integer.toString(mHumanWins));
+        mAndroidWinsTextView.setText(Integer.toString(mAndroidWins));
+        mTiesWinsTextView.setText(Integer.toString(mTiesWins));
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+        mGame.setBoardState(savedInstanceState.getCharArray("board"));
+        mGameOver = savedInstanceState.getBoolean("mGameOver");
+        mInfoTextView.setText(savedInstanceState.getCharSequence("info"));
+        //mGoFirst = savedInstanceState.getChar("mGoFirst");
+
+        mHumanWins   = savedInstanceState.getInt("mHumanWins");
+        mAndroidWins = savedInstanceState.getInt("mAndroidWins");
+        mTiesWins    = savedInstanceState.getInt("mTiesWins");
     }
 
     @Override
@@ -162,6 +242,9 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
                 return true;
             case R.id.about:
                 showDialog(DIALOG_ABOUT);
+                return true;
+            case R.id.reset:
+                showDialog(DIALOG_RESET);
                 return true;
         }
 
@@ -230,6 +313,17 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
                 builder.setPositiveButton("OK", null);
                 dialog = builder.create();
                 break;
+            case DIALOG_RESET:
+                // Save the current scores
+                SharedPreferences.Editor ed = mPrefs.edit();
+                ed.putInt("mHumanWins", 0);
+                ed.putInt("mAndroidWins", 0);
+                ed.putInt("mTiesWins", 0);
+                ed.commit();
+
+                mHumanWins = mAndroidWins = mTiesWins = 0;
+                displayScores();
+                break;
         }
         return dialog;
     }
@@ -238,8 +332,8 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
     {
         mGame.clearBoard();
         mBoardView.invalidate();   // Redraw the board
-
-        if( mGame.first_turn )
+        mGameOver = false;
+        if( mGoFirst )
         {
             mInfoTextView.setText(R.string.first_human);
         }
@@ -249,7 +343,7 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
             setMove(TicTacToeGame.COMPUTER_PLAYER, move);
             mInfoTextView.setText(R.string.turn_human);
         }
-        mGame.first_turn = !mGame.first_turn;
+        mGoFirst = !mGoFirst;
     }
 
     private boolean setMove(char player, int location) {
@@ -258,48 +352,5 @@ public class AndroidTicTacToeActivity extends AppCompatActivity {
             return true;
         }
         return false;
-    }
-
-    // Handles clicks on the game board buttons
-    private class ButtonClickListener implements View.OnClickListener {
-        int location;
-
-        public ButtonClickListener(int location) {
-            this.location = location;
-        }
-
-        public void onClick(View view) {
-            if (mBoardButtons[location].isEnabled()) {
-                setMove(TicTacToeGame.HUMAN_PLAYER, location);
-
-                // If no winner yet, let the computer make a move
-                int winner = mGame.checkForWinner();
-                if (winner == 0) {
-                    mInfoTextView.setText(R.string.turn_computer);
-                    int move = mGame.getComputerMove();
-                    setMove(TicTacToeGame.COMPUTER_PLAYER, move);
-                    winner = mGame.checkForWinner();
-                }
-
-                if (winner == 0) {
-                    mInfoTextView.setText(R.string.turn_human);
-                } else if (winner == 1){
-                    mInfoTextView.setText(R.string.result_tie);
-                    mGame.ties++;
-                    mTiesWins.setText(String.valueOf(mGame.ties));
-                }
-                else if (winner == 2) {
-                    mInfoTextView.setText(R.string.result_human_wins);
-                    mGame.human_wins++;
-                    mHumanWins.setText(String.valueOf(mGame.human_wins));
-                }
-                else {
-                    mGameOver = true;
-                    mInfoTextView.setText(R.string.result_computer_wins);
-                    mGame.computer_wins++;
-                    mAndroidWins.setText(String.valueOf(mGame.computer_wins));
-                }
-            }
-        }
     }
 }
